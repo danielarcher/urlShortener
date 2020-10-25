@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"urlShortener/handlers"
 	"urlShortener/storages"
@@ -21,6 +22,9 @@ func routes() {
 }
 
 func serve() {
-	_ = http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatalf("server could not start: %v", err)
+	}
 }
 
