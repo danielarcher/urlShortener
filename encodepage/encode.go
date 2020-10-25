@@ -1,6 +1,8 @@
 package encodepage
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -12,6 +14,13 @@ type Handler struct {
 	storage storages.Storage
 }
 
+type EncodeRequest struct {
+	Url string `json:"url"`
+}
+type EncodeResponse struct {
+	RedirectUrl string `json:"redirect_url"`
+}
+
 func NewHandler(l *log.Logger, s storages.Storage) *Handler {
 	return &Handler{
 		logger:  l,
@@ -20,21 +29,31 @@ func NewHandler(l *log.Logger, s storages.Storage) *Handler {
 }
 
 func (h *Handler) Encode(w http.ResponseWriter, r *http.Request)  {
-	url := findUrl(r)
-	if url == "" {
+	var encReq EncodeRequest
+	data,_ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(data, &encReq)
+	h.logger.Println(encReq.Url)
+
+	if encReq.Url == "" {
 		_, _ = w.Write([]byte("empty url"))
 		return
 	}
 
-	code, err := h.storage.Save(url)
+	code, err := h.storage.Save(encReq.Url)
 	if err != nil {
 		h.logger.Fatal("Unable to save: ", err)
 	}
 
-	h.logger.Println("Encoded url:" + url + " to code:" + code)
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	h.logger.Println("Encoded url:" + encReq.Url + " to code:" + code)
+
+	var encRes = EncodeResponse{
+		RedirectUrl: "http://localhost:8080/go/"+code,
+	}
+
+	data, _ = json.Marshal(encRes)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("http://localhost:8080/go/" + code))
+	w.Write(data)
 }
 
 func (h *Handler) WithLogger(next http.HandlerFunc) http.HandlerFunc  {

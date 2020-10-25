@@ -8,16 +8,21 @@ go run main.go
 ```
 Perform a POST request
 ```shell script
-$ curl --location --request POST 'http://localhost:8080/encode?url=http://www.google.com'
+curl --location --request POST 'http://localhost:8080/encode' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "url": "http://www.google.com.br"
+}'
 ```
 return must be something like
 ```shell script
-/go/JJxrKUOX
+{
+    "redirect_url": "http://localhost:8080/go/xcjHoW17"
+}
 ```
 now you can access your local browser
-http://localhost:8080/go/JJxrKUOX
+http://localhost:8080/go/xcjHoW17
 
 ## Improvements
-- Uses form instead of url param
 - Statistics for how many stored urls and redirects performed
 - Add test cases
