@@ -67,10 +67,3 @@ func (h *Handler) WithLogger(next http.HandlerFunc) http.HandlerFunc  {
 func (h *Handler) SetupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/encode", h.WithLogger(h.Encode))
 }
-
-func findUrl(r *http.Request) string {
-	keys, _ := r.URL.Query()["url"]
-	url := keys[0]
-
-	return url
-}

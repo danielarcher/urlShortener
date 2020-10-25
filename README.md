@@ -25,4 +25,3 @@ http://localhost:8080/go/xcjHoW17
 
 ## Improvements
 - Statistics for how many stored urls and redirects performed
-- Add test cases
