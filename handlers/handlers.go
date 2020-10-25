@@ -15,42 +15,6 @@ func Home() http.Handler {
 	return http.HandlerFunc(handleFunc)
 }
 
-func Encode(s storages.Storage) http.Handler {
-	handleFunc := func(w http.ResponseWriter, r *http.Request) {
-		url := findUrl(r)
-		if url == "" {
-			_, _ = w.Write([]byte("empty url"))
-			return
-		}
-		code := saveUrl(s, url)
-		writeToUser(w, url, code)
-	}
-
-	return http.HandlerFunc(handleFunc)
-}
-
-func writeToUser(w http.ResponseWriter, url string, code string) {
-	log.Println("Encoded url:" + url + " to code:" + code)
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("/go/" + code))
-}
-
-func saveUrl(s storages.Storage, url string) string {
-	code, err := s.Save(url)
-	if err != nil {
-		log.Fatal("Unable to save: ", err)
-	}
-	return code
-}
-
-func findUrl(r *http.Request) string {
-	keys,_ := r.URL.Query()["url"]
-	url := keys[0]
-
-	return url
-}
-
 func Redirect(s storages.Storage) http.Handler {
 	handleFunc := func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Path[len("/go/"):]
