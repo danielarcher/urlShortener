@@ -31,7 +31,9 @@ func Encode(s storages.Storage) http.Handler {
 
 func writeToUser(w http.ResponseWriter, url string, code string) {
 	log.Println("Encoded url:" + url + " to code:" + code)
-	_, _ = w.Write([]byte("/go/" + code))
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("/go/" + code))
 }
 
 func saveUrl(s storages.Storage, url string) string {
