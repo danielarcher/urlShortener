@@ -1,41 +1,41 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"urlShortener/handlers"
+	"os"
+	"urlShortener/encodepage"
+	"urlShortener/redirectpage"
 	"urlShortener/server"
-	"urlShortener/shortener"
 	"urlShortener/storages"
 )
 
+var (
+	serverAddress = os.Getenv("SERVER_PORT")
+	storagePath = os.Getenv("STORAGE_PATH")
+)
+
 func main() {
-	srv := server.New(routes(),":8080")
+	logger := log.New(os.Stdout, "urlShortener ", log.LstdFlags|log.Lshortfile)
+	storage := storages.NewFileSystem("C:\\webserver") //"C:\\webserver"
+
+	mux := http.NewServeMux()
+
+	routes(logger, storage, mux)
+
+	srv := server.New(mux, ":8080") //:8080
+	logger.Println("Starting server")
+
 	err := srv.ListenAndServe()
 	if err != nil {
 		log.Fatalf("server could not start: %v", err)
 	}
 }
 
-func routes() *http.ServeMux {
-	mux := http.NewServeMux()
+func routes(logger *log.Logger, storage *storages.FileSystem, mux *http.ServeMux) {
+	encode := encodepage.NewHandler(logger, storage)
+	encode.SetupRoutes(mux)
 
-	storage := storages.FileSystem{
-		Path: "C:\\webserver",
-	}
-	handler := shortener.NewHandler(storage)
-	mux.Handle("/", handlers.Home())
-	mux.HandleFunc("/encode/", handler.Encode)
-	mux.HandleFunc("/go/", func(w http.ResponseWriter, r *http.Request) {
-		code := r.URL.Path[len("/go/"):]
-		url,err := handler.Decode(code)
-		if err != nil {
-			_, _ = fmt.Fprintln(w, "not found")
-			return
-		}
-		http.Redirect(w, r, url, 302)
-	})
-
-	return mux
+	redirect := redirectpage.NewHandler(logger, storage)
+	redirect.SetupRoutes(mux)
 }

@@ -20,3 +20,9 @@ func (f FileSystem) Load(code string) (string, error) {
 
 	return string(urlBytes), err
 }
+
+func NewFileSystem(path string) *FileSystem  {
+	return &FileSystem{
+		Path: path,
+	}
+}
