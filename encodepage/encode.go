@@ -20,6 +20,9 @@ type EncodeRequest struct {
 type EncodeResponse struct {
 	RedirectUrl string `json:"redirect_url"`
 }
+type ErrorResponse struct {
+	Message string `json:"error"`
+}
 
 func NewHandler(l *log.Logger, s storages.Storage) *Handler {
 	return &Handler{
@@ -35,7 +38,9 @@ func (h *Handler) Encode(w http.ResponseWriter, r *http.Request)  {
 	h.logger.Println(encReq.Url)
 
 	if encReq.Url == "" {
-		_, _ = w.Write([]byte("empty url"))
+		data, _ = json.Marshal(ErrorResponse{Message: "Empty url"})
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write(data)
 		return
 	}
 
