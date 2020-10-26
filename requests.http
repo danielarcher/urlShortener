@@ -5,9 +5,34 @@ Content-Type: application/json
   "url": "http://www.google.com"
 }
 
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
 ###
-GET http://localhost:8080/
-Accept: application/json
+POST http://localhost:8080/encode
+Content-Type: application/json
 
+{
+  "url": ""
+}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 400, "Response status is not 400");
+});
+%}
 ###
-POST http://localhost:8080/encode?url=http://www.google.com
+POST http://localhost:8080/encode
+Content-Type: application/json
+
+{
+  "incorrectUrlParam": "http://www.google.com"
+}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 400, "Response status is not 400");
+});
+%}
